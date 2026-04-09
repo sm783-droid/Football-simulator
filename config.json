@@ -1,0 +1,24 @@
+{
+  "test_dir": "tests/",
+  "pass_to_pass": [
+    "test_random_names_returns_correct_count",
+    "test_random_names_are_unique",
+    "test_random_names_various_sizes",
+    "test_make_fixtures_total_count",
+    "test_random_score_types_and_range",
+    "test_make_fixtures_home_away_pairs_appear_once_each",
+    "test_make_fixtures_no_team_plays_itself",
+    "test_make_fixtures_five_per_week",
+    "test_make_fixtures_home_away_balance",
+    "test_manager_is_assigned_to_team",
+    "test_get_all_managers_returns_one_per_team",
+    "test_manager_initial_stats_are_zero"
+  ],
+  "fail_to_pass": [
+    "test_manager_points_match_team_points_after_win",
+    "test_manager_win_record_matches_team_after_multiple_games",
+    "test_manager_stats_revert_correctly_on_score_override"
+  ],
+  "code_patch": "code.patch.diff",
+  "test_patch": "test.patch.diff"
+}

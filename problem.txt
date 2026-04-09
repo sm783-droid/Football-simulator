@@ -1,0 +1,20 @@
+Bug: Manager stats not updated on match results
+db_games._delta() updates team stats correctly but does not write to the managers table. Manager wins, draws, losses, and points stay at 0 regardless of match outcomes.
+
+Status
+* ✅ Managers are registered and linked to teams
+* ✅ Match scores are saved and team stats update correctly
+* ❌ Manager stats are never written after a result
+* ❌ Manager stats are never reverted on score override
+
+Root cause
+_delta() in db_games.py — the manager sync block is commented out:
+
+# for team_id, won, lost in [(h, home_won, away_won), ...]:
+#     c.execute("UPDATE managers SET wins=wins+? ... WHERE team_id=?", ...)
+
+
+Affected tests
+tests/test_managers.py::test_manager_points_match_team_points_after_win
+tests/test_managers.py::test_manager_win_record_matches_team_after_multiple_games
+tests/test_managers.py::test_manager_stats_revert_correctly_on_score_override
