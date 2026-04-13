@@ -3,7 +3,7 @@
   "pipeline": "aspen",
   "repo": {
     "source_url": "https://github.com/sm783-droid/Football-simulator",
-    "base_commit": "4dd9de884aa6b341fd3428d9c50642699414f29e",
+    "base_commit": "92d6630af91da0458fa4766544e819ecdb505630",
     "image_name": "micro1ai/football-sim",
     "repo_dir": "/repo",
     "language": "python"
