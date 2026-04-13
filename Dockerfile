@@ -47,8 +47,9 @@ ENV PATH="/repo/venv/bin:$PATH"
 RUN pip install --upgrade pip --quiet \
     && pip install -r requirements.txt --quiet
 
-# Initialise a git repo in the WORKDIR
-RUN git init
+# Initialise a git repo and mark it safe for all users
+RUN git init \
+    && git config --system --add safe.directory /repo
 
 # Default display (overridden at runtime via -e DISPLAY=...)
 ENV DISPLAY=:0
