@@ -36,7 +36,7 @@ WORKDIR /repo
 # Copy source
 COPY app.py db.py db_games.py db_managers.py simulation.py \
      styles.py ui_league.py ui_setup.py ui_week.py \
-     config.json requirements.txt ./
+     task_config.json requirements.txt ./
 
 # Create and activate a virtual environment
 RUN python -m venv /repo/venv
