@@ -80,4 +80,30 @@ def _delta(c, game, sign, hs=None, as_=None):
             "UPDATE teams SET drawn=drawn+?, points=points+? WHERE id=?", (sign, sign, h))
         c.execute(
             "UPDATE teams SET drawn=drawn+?, points=points+? WHERE id=?", (sign, sign, a))
+
+        # fix
+    home_won = hs > as_
+    away_won = hs < as_
+    is_draw = hs == as_
+
+    outcomes = [
+        (h, home_won, away_won),
+        (a, away_won, home_won)
+    ]
+
+    for team_id, won, lost in outcomes:
+        wins = sign if won else 0
+        draws = sign if is_draw else 0
+        losses = sign if lost else 0
+        points = sign * 3 if won else (sign if is_draw else 0)
+
+        c.execute("""
+            UPDATE managers
+            SET wins = wins + ?,
+                draws = draws + ?,
+                losses = losses + ?,
+                points = points + ?
+            WHERE team_id = ?
+        """, (wins, draws, losses, points, team_id))
+
         
