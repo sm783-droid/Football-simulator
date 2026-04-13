@@ -21,13 +21,14 @@
 #              -e DB_DIR=/app/data \
 #              football-sim
 
-FROM python:3.11-slim
+FROM --platform=linux/amd64 python:3.11-slim   
 
-# Install tkinter + X11 client libraries
+# Install tkinter + X11 client libraries + git
 RUN apt-get update && apt-get install -y --no-install-recommends \
         python3-tk \
         tk-dev \
         libx11-6 \
+        git \                                   
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
@@ -42,8 +43,12 @@ RUN python -m venv /app/venv
 ENV VIRTUAL_ENV=/app/venv
 ENV PATH="/app/venv/bin:$PATH"
 
-# No pip packages needed, but upgrade pip for good measure
-RUN pip install --upgrade pip --quiet
+# Install dependencies (includes pytest for test runs)
+RUN pip install --upgrade pip --quiet \
+    && pip install -r requirements.txt --quiet   
+
+# Initialise a git repo in the WORKDIR
+RUN git init                                    
 
 # Default display (overridden at runtime via -e DISPLAY=...)
 ENV DISPLAY=:0
