@@ -48,3 +48,46 @@ def test_manager_initial_stats_are_zero():
     assert mgr["losses"] == 0
     assert mgr["points"] == 0
 
+# failing tests 
+def test_manager_points_match_team_points_after_win():
+    """After a home win, the manager's points should equal the team's points (3)."""
+    home_id, _, game_id = _setup_game()
+    db_games.save_score(game_id, 2, 0)          
+
+    team = next(t for t in db.get_teams() if t["id"] == home_id)
+    mgr  = db_managers.get_manager(home_id)
+
+    assert mgr["points"] == team["points"]      
+
+
+def test_manager_win_record_matches_team_after_multiple_games():
+    """Manager's wins should track the team's wins across several game weeks."""
+    db.add_team("Home FC"); db.add_team("Away FC")
+    home_id, away_id = db.team_ids()
+    db_managers.add_manager(home_id, simulation.random_manager_name())
+    db_managers.add_manager(away_id, simulation.random_manager_name())
+
+    for week in range(1, 4):                   
+        db_games.add_fixture(week, home_id, away_id)
+        db_games.save_score(db_games.get_week(week)[0]["id"], 1, 0)
+
+    team = next(t for t in db.get_teams() if t["id"] == home_id)
+    mgr  = db_managers.get_manager(home_id)
+
+    assert mgr["wins"] == team["won"]           
+
+
+def test_manager_stats_revert_correctly_on_score_override():
+    """
+    Override a result: manager stats should revert the old result
+    and apply the new one, staying in sync with the team.
+    """
+    home_id, _, game_id = _setup_game()
+    db_games.save_score(game_id, 3, 0)          
+    db_games.save_score(game_id, 0, 0)          
+
+    team = next(t for t in db.get_teams() if t["id"] == home_id)
+    mgr  = db_managers.get_manager(home_id)
+
+    assert mgr["points"] == team["points"]      
+    assert mgr["draws"]  == team["drawn"]  
