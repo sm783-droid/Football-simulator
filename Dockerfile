@@ -1,29 +1,23 @@
 FROM --platform=linux/amd64 python:3.11-slim
 
+# Install git, tkinter + X11 client libraries
 RUN apt-get update && apt-get install -y --no-install-recommends \
+        git \
         python3-tk \
         tk-dev \
         libx11-6 \
-        git \
     && rm -rf /var/lib/apt/lists/*
 
+# Clone repo at exact base commit (buggy state — no fixes applied)
 WORKDIR /repo
+RUN git clone https://github.com/sm783-droid/Football-simulator.git . && \
+    git checkout 92d6630af91da0458fa4766544e819ecdb505630
 
-COPY app.py db.py db_games.py db_managers.py simulation.py \
-     styles.py ui_league.py ui_setup.py ui_week.py \
-     task_config.json requirements.txt ./
+# Install dependencies
+RUN pip install --no-cache-dir -r requirements.txt
 
-COPY tests/ ./tests/
-
-RUN python -m venv /repo/venv
-ENV VIRTUAL_ENV=/repo/venv
-ENV PATH="/repo/venv/bin:$PATH"
-
-RUN pip install --upgrade pip --quiet \
-    && pip install -r requirements.txt --quiet
-
-RUN git init \
-    && git config --system --add safe.directory /repo \
+# Mark repo as safe for all users and ensure write access
+RUN git config --system --add safe.directory /repo \
     && chmod -R 777 /repo
 
 ENV DISPLAY=:0
