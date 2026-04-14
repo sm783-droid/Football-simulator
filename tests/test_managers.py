@@ -1,11 +1,5 @@
 """
 test_managers.py — manager feature tests
-
-3 tests below are INTENTIONALLY FAILING.
-Managers exist and are linked to teams, but _delta() in db_games.py
-does not yet update manager stats after results.
-
-To fix: uncomment the TODO block at the bottom of _delta() in db_games.py.
 """
 import pytest
 import db, db_games, db_managers, simulation

@@ -1,8 +1,7 @@
 """db_managers.py — manager CRUD
 
 Manager stats (wins/draws/losses/points) exist in the schema but are never
-updated by _delta() in db_games.py — see the commented-out block there to
-fix the failing tests in test_managers.py.
+updated by _delta() in db_games.py 
 """
 from db import get_db
 
