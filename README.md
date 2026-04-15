@@ -78,7 +78,6 @@ WSLg ships a built-in Wayland/X11 server. No extra software needed.
    ```
 
 ## Persisting the Database
-
 By default the SQLite database (`football.db`) lives inside the container and is lost when it stops. To persist it across runs, mount a local directory:
 
 ```bash
