@@ -42,9 +42,11 @@ def save_score(game_id, hs, as_):
                          (game_id,)).fetchone()
         if game["played"]:
             _delta(c, game, -1)
+            _manager_delta(c, game, -1)
         c.execute("UPDATE games SET home_score=?, away_score=?, played=1 WHERE id=?",
                   (hs, as_, game_id))
         _delta(c, game, +1, hs, as_)
+        _manager_delta(c, game, +1, hs, as_)
 
 
 def _delta(c, game, sign, hs=None, as_=None):
@@ -80,3 +82,26 @@ def _delta(c, game, sign, hs=None, as_=None):
             "UPDATE teams SET drawn=drawn+?, points=points+? WHERE id=?", (sign, sign, h))
         c.execute(
             "UPDATE teams SET drawn=drawn+?, points=points+? WHERE id=?", (sign, sign, a))
+
+
+def _manager_delta(c, game, sign, hs=None, as_=None):
+    """Add or subtract one game's stats from both managers (sign = +1 or -1)."""
+    h, a = game["home_team_id"], game["away_team_id"]
+    if hs is None:
+        hs, as_ = game["home_score"], game["away_score"]
+
+    if hs > as_:
+        c.execute(
+            "UPDATE managers SET wins=wins+?,   points=points+? WHERE team_id=?", (sign, sign*3, h))
+        c.execute(
+            "UPDATE managers SET losses=losses+?                WHERE team_id=?", (sign, a))
+    elif hs < as_:
+        c.execute(
+            "UPDATE managers SET losses=losses+?                WHERE team_id=?", (sign, h))
+        c.execute(
+            "UPDATE managers SET wins=wins+?,   points=points+? WHERE team_id=?", (sign, sign*3, a))
+    else:
+        c.execute(
+            "UPDATE managers SET draws=draws+?, points=points+? WHERE team_id=?", (sign, sign, h))
+        c.execute(
+            "UPDATE managers SET draws=draws+?, points=points+? WHERE team_id=?", (sign, sign, a))
