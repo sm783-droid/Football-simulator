@@ -1,0 +1,27 @@
+{
+  "instance_id": "",
+  "pipeline": "aspen",
+  "repo": {
+    "source_url": "https://github.com/sm783-droid/Football-simulator",
+    "base_commit": "635b6e5079d159c48847b6fe6c9f60b8d929a2cf",
+    "image_name": "micro1ai/football-sim:1",
+    "repo_dir": "/repo",
+    "language": "python"
+  },
+  "test_cmd": "python -m pytest tests/ -v --tb=short",
+  "log_parser": "parse_log_pytest",
+  "FAIL_TO_PASS": [
+    "tests/test_buggs.py::test_winning_manager_gets_3_points",
+    "tests/test_buggs.py::test_losing_manager_gets_0_points_and_1_loss",
+    "tests/test_buggs.py::test_draw_gives_both_managers_1_point",
+    "tests/test_buggs.py::test_manager_points_match_team_points_after_win",
+    "tests/test_buggs.py::test_score_override_keeps_manager_stats_in_sync"
+  ],
+  "PASS_TO_PASS": [
+    "tests/test_db.py::test_init_creates_tables"
+  ],
+  "test_dirs": ["tests/"],
+  "e2b_template_id": "",
+  "hidden_test_patch": "test_patch.diff",
+  "golden_patch": "gold_patch.diff"
+}
