@@ -28,7 +28,7 @@ Actual: manager stats remain 0 after every result.
 ## Important TDD Rules
 
 - You MUST write tests BEFORE editing any source code. This is a strict requirement.
-- Write your tests in the appropriate test directory for this project.
+- Write your tests in the appropriate test directory for this project i.e tests/ folder
 - Run your tests to confirm they FAIL on the current buggy code.
 - THEN implement the fix in the source code.
 - Run tests again to confirm they pass.
