@@ -79,4 +79,4 @@ def _delta(c, game, sign, hs=None, as_=None):
         c.execute(
             "UPDATE teams SET drawn=drawn+?, points=points+? WHERE id=?", (sign, sign, h))
         c.execute(
-            "UPDATE teams SET drawn=drawn+?, points=points+? WHERE id=?", (sign, sign, a)) 
+            "UPDATE teams SET drawn=drawn+?, points=points+? WHERE id=?", (sign, sign, a))
