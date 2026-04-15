@@ -11,7 +11,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Clone repo at exact base commit (buggy state — no fixes applied)
 WORKDIR /repo
 RUN git clone https://github.com/sm783-droid/Football-simulator.git . && \
-    git checkout 
+    git checkout 9d3ea774c72b04433c454a3fd15b9fc3c5dc0d47
 
 # Install dependencies
 RUN pip install --no-cache-dir -r requirements.txt
