@@ -1,7 +1,7 @@
 """ui_week.py — Game Week tab: view fixtures, simulate, save/override scores"""
 import tkinter as tk
 from tkinter import ttk, messagebox
-import db_games, simulation
+import store, simulation
 from styles import BG, PANEL, MUTED, TEXT, ENTRY_BG, WIN_CLR, DRAW_CLR, LOSS_CLR
 
 class WeekTab:
@@ -51,9 +51,9 @@ class WeekTab:
         return dict(hl=hl, hv=hv, av=av, al=al, badge=badge)
 
     def refresh(self):
-        mw = db_games.max_week()
+        mw = store.max_week()
         self._week_lbl.config(text=f"Game Week {self.current_week}" + (f" / {mw}" if mw else ""))
-        games = db_games.get_week(self.current_week)
+        games = store.get_week(self.current_week)
         if not games:
             self._info.config(text="No fixtures. Register teams and generate fixtures first.")
             for r in self._rows: r["hl"].config(text=""); r["al"].config(text="")
@@ -75,11 +75,11 @@ class WeekTab:
                 row["badge"].config(text="PENDING", fg=MUTED)
 
     def _simulate(self):
-        if not db_games.has_fixtures():
+        if not store.has_fixtures():
             messagebox.showerror("No fixtures", "Generate fixtures first."); return
-        for g in db_games.get_week(self.current_week):
+        for g in store.get_week(self.current_week):
             if not g["played"]:
-                db_games.save_score(g["id"], *simulation.random_score())
+                store.save_score(g["id"], *simulation.random_score())
         self.refresh(); self._on_change()
         self._status.config(text=f"✓  Week {self.current_week} simulated.")
 
@@ -99,11 +99,11 @@ class WeekTab:
         if errors:
             messagebox.showerror("Invalid scores", "\n".join(errors)); return
         saved = sum(1 for gid, s in zip(self._game_ids, parsed)
-                    if s and not db_games.save_score(gid, s[0], s[1]))
+                    if s and not store.save_score(gid, s[0], s[1]))
         self.refresh(); self._on_change()
         self._status.config(text=f"✓  {len([s for s in parsed if s])} score(s) saved.")
 
     def _prev(self):
         if self.current_week > 1: self.current_week -= 1; self.refresh()
     def _next(self):
-        if self.current_week < db_games.max_week(): self.current_week += 1; self.refresh()
+        if self.current_week < store.max_week(): self.current_week += 1; self.refresh()

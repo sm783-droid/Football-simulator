@@ -1,11 +1,8 @@
 """ui_setup.py — Setup tab: register teams, generate fixtures, reset"""
 import tkinter as tk
 from tkinter import ttk, messagebox
-import db
-import db_games
-import db_managers
-import simulation
-from styles import BG, PANEL, ACCENT2, TEXT
+import store, simulation
+from styles import PANEL, ACCENT2, TEXT
 
 
 class SetupTab:
@@ -43,41 +40,40 @@ class SetupTab:
 
     def refresh(self):
         self._listbox.delete(0, "end")
-        for i, t in enumerate(db.get_teams(), 1):
+        for i, t in enumerate(store.get_teams(), 1):
             self._listbox.insert("end", f"  {i:>2}.  {t['name']}")
 
     def _register(self):
-        if db.team_count() > 0:
+        if store.team_count() > 0:
             if not messagebox.askyesno("Teams exist", "Reset and re-register?"):
                 return
-            db.reset()
+            store.reset()
         for name in simulation.random_names(10):
-            db.add_team(name)
-        for team in db.get_teams():
-            db_managers.add_manager(team["id"], simulation.random_manager_name())
+            store.add_team(name)
+        for team in store.get_teams():
+            store.add_manager(team["id"], simulation.random_manager_name())
         self._on_change()
         self._status.config(text="✓  10 teams registered with managers.")
 
     def _generate(self):
-        if db.team_count() < 10:
+        if store.team_count() < 10:
             messagebox.showerror("No teams", "Register 10 teams first.")
             return
-        if db_games.has_fixtures():
+        if store.has_fixtures():
             if not messagebox.askyesno("Fixtures exist", "Regenerate?"):
                 return
             names = [self._listbox.get(i) for i in range(self._listbox.size())]
-            db.reset()
+            store.reset()
             for n in names:
-                db.add_team(n.strip())
-        for (w, h, a) in simulation.make_fixtures(db.team_ids()):
-            db_games.add_fixture(w, h, a)
+                store.add_team(n.strip())
+        for (w, h, a) in simulation.make_fixtures(store.team_ids()):
+            store.add_fixture(w, h, a)
         self._on_change()
-        self._status.config(
-            text=f"✓  90 fixtures over {db_games.max_week()} game weeks.")
+        self._status.config(text=f"✓  90 fixtures over {store.max_week()} game weeks.")
 
     def _reset(self):
         if not messagebox.askyesno("Reset", "Delete all data? This cannot be undone."):
             return
-        db.reset()
+        store.reset()
         self._on_change()
         self._status.config(text="Season reset.")

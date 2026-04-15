@@ -1,7 +1,7 @@
 """app.py — entry point; assembles tabs and wires refresh callbacks"""
 import tkinter as tk
 from tkinter import ttk
-import db, db_games, styles
+import store, styles
 from ui_setup    import SetupTab
 from ui_week     import WeekTab
 from ui_league   import LeagueTab
@@ -13,7 +13,7 @@ class FootballApp:
         root.geometry("960x660")
         root.configure(bg=styles.BG)
 
-        db.init()
+        store.init()
         styles.apply(root)
 
         nb = ttk.Notebook(root)
@@ -29,7 +29,7 @@ class FootballApp:
         self.refresh_all()
 
     def refresh_all(self):
-        self.week_tab.current_week = db_games.current_week() or 1
+        self.week_tab.current_week = store.current_week() or 1
         self.setup_tab.refresh()
         self.week_tab.refresh()
         self.league_tab.refresh()

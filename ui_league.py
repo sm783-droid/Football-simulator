@@ -1,6 +1,6 @@
 """ui_league.py — League Table tab"""
 from tkinter import ttk
-import db
+import store
 from styles import PANEL, ACCENT, ACCENT2
 
 _COLS   = ("pos","team","p","w","d","l","gf","ga","gd","pts")
@@ -35,7 +35,7 @@ class LeagueTab:
 
     def refresh(self):
         self._tree.delete(*self._tree.get_children())
-        for pos, t in enumerate(db.get_teams(), 1):
+        for pos, t in enumerate(store.get_teams(), 1):
             gd = t["goals_for"] - t["goals_against"]
             tag = "top3" if pos <= 3 else ("odd" if pos % 2 else "even")
             self._tree.insert("", "end", tags=(tag,), values=(
