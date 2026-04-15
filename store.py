@@ -34,7 +34,7 @@ def reset():
 def add_team(name):
     global _next_tid
     if any(t["name"] == name for t in _teams.values()):
-        return 
+        return  # ignore duplicates
     _teams[_next_tid] = dict(id=_next_tid, name=name, played=0, won=0, drawn=0,
                               lost=0, goals_for=0, goals_against=0, points=0)
     _next_tid += 1
@@ -121,10 +121,12 @@ def save_score(game_id, hs, as_):
         return
     if game["played"]:
         _delta(game, -1)
+        _manager_delta(game, -1)  
     game["home_score"] = hs
     game["away_score"] = as_
     game["played"] = 1
     _delta(game, +1, hs, as_)
+    _manager_delta(game, +1, hs, as_)  
 
 
 # ---------------------------------------------------------------------------
@@ -151,3 +153,23 @@ def _delta(game, sign, hs=None, as_=None):
     else:
         _teams[h]["drawn"]  += sign;  _teams[h]["points"] += sign
         _teams[a]["drawn"]  += sign;  _teams[a]["points"] += sign
+
+
+def _manager_delta(game, sign, hs=None, as_=None):
+    """Add or subtract one game's contribution from both managers."""
+    h, a = game["home_team_id"], game["away_team_id"]
+    if hs is None:
+        hs, as_ = game["home_score"], game["away_score"]
+
+    hm = _managers.get(h)
+    am = _managers.get(a)
+
+    if hs > as_:
+        if hm: hm["wins"]   += sign;  hm["points"] += sign * 3
+        if am: am["losses"] += sign
+    elif hs < as_:
+        if hm: hm["losses"] += sign
+        if am: am["wins"]   += sign;  am["points"] += sign * 3
+    else:
+        if hm: hm["draws"]  += sign;  hm["points"] += sign
+        if am: am["draws"]  += sign;  am["points"] += sign
