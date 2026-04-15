@@ -151,4 +151,3 @@ def _delta(game, sign, hs=None, as_=None):
     else:
         _teams[h]["drawn"]  += sign;  _teams[h]["points"] += sign
         _teams[a]["drawn"]  += sign;  _teams[a]["points"] += sign
-
