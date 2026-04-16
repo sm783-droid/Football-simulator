@@ -1,35 +1,83 @@
 ## Issue description
 
-Manager stats (wins, draws, losses, points) are never updated after a match
-result is recorded. While team stats update correctly via db_games._delta(),
-the equivalent write to the managers table is missing. Manager records stay
-at 0 permanently, regardless of match outcomes or score overrides.
+Manager stats (wins, draws, losses, points) are never updated when a match
+result is saved. Team stats update correctly, but the matching write to the
+manager record is absent. Manager stats stay at zero for every manager,
+regardless of how many matches are played or what the scores are.
 
-Expected: manager stats mirror team stats at all times.
-Actual: manager stats remain 0 after every result.
+A second failure mode exists when a score is overridden: even if manager stats
+were somehow updated on the first save, saving a new score over an existing
+result must revert the old result and apply the new one. Stacking stats instead
+of replacing them is also a bug.
 
 ## Steps to reproduce
 
-1. Register two teams (db.add_team)
-2. Assign a manager to each team (db_managers.add_manager)
-3. Add a fixture (db_games.add_fixture)
-4. Save a score — e.g. 2-0 (db_games.save_score)
-5. Read back the manager record (db_managers.get_manager)
-6. Observe: mgr["points"] == 0 while team["points"] == 3
+1. Call `store.add_team("Home FC")` and `store.add_team("Away FC")`
+2. Call `store.add_manager(home_id, "Alice")` and `store.add_manager(away_id, "Bob")`
+3. Call `store.add_fixture(1, home_id, away_id)`
+4. Call `store.save_score(game_id, 2, 0)` — a home win
+5. Call `store.get_manager(home_id)` and inspect `mgr["points"]`
+6. Observe: `mgr["points"] == 0` while `store.get_teams()[0]["points"] == 3`
 
 ## Expected behavior
 
-- After a win:  manager points == 3, wins == 1
-- After a draw: manager points == 1, draws == 1
-- After a loss: manager points == 0, losses == 1
-- After a score override: manager stats revert the old result and apply
-  the new one, staying in sync with the team (same as team stat revert logic)
+Manager stats must mirror their team's stats at all times.
 
-## Important TDD Rules
+After a home win (e.g. 2–0):
+- `home_mgr["wins"]   == 1`
+- `home_mgr["points"] == 3`
+- `away_mgr["losses"] == 1`
+- `away_mgr["points"] == 0`
 
-- You MUST write tests BEFORE editing any source code. This is a strict requirement.
-- Write your tests in the appropriate test directory for this project i.e tests/ folder
-- Run your tests to confirm they FAIL on the current buggy code.
-- THEN implement the fix in the source code.
-- Run tests again to confirm they pass.
+After a draw (e.g. 1–1):
+- `home_mgr["draws"]  == 1`
+- `home_mgr["points"] == 1`
+- `away_mgr["draws"]  == 1`
+- `away_mgr["points"] == 1`
+
+After saving a second score that overrides the first (e.g. 2–0 then 0–2):
+- Manager stats must reflect only the latest result — not the sum of both
+- `home_mgr["wins"]   == 0`, `home_mgr["losses"] == 1`, `home_mgr["points"] == 0`
+- `away_mgr["wins"]   == 1`, `away_mgr["losses"] == 0`, `away_mgr["points"] == 3`
+
+## Important TDD rules
+
+- You MUST run the existing tests BEFORE editing any source code. This is a strict
+  requirement.
+- The failing tests already exist in `/tests/test_bugs.py`.
+- Run them and confirm they all FAIL on the current buggy code.
+- THEN fix the source code.
+- Run the tests again to confirm they all PASS.
 - Make minimal, targeted changes.
+
+You MUST follow these steps in exact order. Do not skip any step.
+
+### Step 1 — run the existing tests and confirm they fail
+
+From the `/tests` directory:
+
+```
+pytest tests/test_bugs.py -v
+```
+
+All five tests should FAIL. If any pass, re-read the code before proceeding.
+
+Note: `tests/conftest.py` already exists and handles store reset between tests,
+as well as adding the project root to `sys.path`. You do not need to create it.
+
+### Step 2 — fix the source code
+
+The bug is in `store.py`. Make the minimal change needed so that saving a score
+also updates the managers of both teams involved in the match, applying the same
+win/draw/loss logic used for team stats, including correct reversal when an
+existing result is overridden.
+
+### Step 3 — verify
+
+Run the tests again:
+
+```
+pytest tests/test_bugs.py -v
+```
+
+All 5 tests must pass with no errors or warnings.
